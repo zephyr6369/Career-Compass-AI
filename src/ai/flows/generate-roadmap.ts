@@ -22,6 +22,7 @@ const GenerateRoadmapOutputSchema = z.object({
   skills: z.string().describe('A markdown formatted list of in-demand skills.'),
   trends: z.string().describe('A markdown formatted list of future trends.'),
   journey: z.string().describe('A markdown formatted step-by-step journey from beginner to job-ready.'),
+  topCompanies: z.string().describe('A markdown formatted list of top tech MNCs that hire for this role, including their estimated salary packages.'),
 });
 
 export type GenerateRoadmapOutput = z.infer<typeof GenerateRoadmapOutputSchema>;
@@ -41,7 +42,8 @@ const generateRoadmapPrompt = ai.definePrompt({
   - For "qualifications", list the typical degrees, certifications, and other qualifications needed.
   - For "skills", list the key technical and soft skills that are in demand.
   - For "trends", describe the future outlook and emerging trends in this field.
-  - For "journey", provide a clear, step-by-step path for a beginner to become job-ready.`,
+  - For "journey", provide a clear, step-by-step path for a beginner to become job-ready.
+  - For "topCompanies", list major tech companies hiring for this role and provide estimated salary ranges (e.g., for junior, mid, senior levels).`,
   model: 'googleai/gemini-1.5-flash-latest',
   config: {
     temperature: 0.5,

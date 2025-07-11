@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { GraduationCap, Wrench, TrendingUp, Map, Download, Copy } from 'lucide-react';
+import { GraduationCap, Wrench, TrendingUp, Map, Download, Copy, Building2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -23,6 +23,7 @@ const sectionsConfig = [
   { key: 'skills', title: 'In-Demand Skills', icon: <Wrench className="h-6 w-6" /> },
   { key: 'trends', title: 'Future Trends', icon: <TrendingUp className="h-6 w-6" /> },
   { key: 'journey', title: 'Step-by-Step Journey', icon: <Map className="h-6 w-6" /> },
+  { key: 'topCompanies', title: 'Top Companies & Salaries', icon: <Building2 className="h-6 w-6" /> },
 ] as const;
 
 
@@ -45,7 +46,7 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
     try {
       const canvas = await html2canvas(element, {
         scale: 2,
-        backgroundColor: null, // Use transparent background for canvas
+        backgroundColor: 'hsl(var(--background))',
         logging: true,
       });
       
