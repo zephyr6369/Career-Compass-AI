@@ -37,7 +37,6 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground;
-    background-image: linear-gradient(90deg, hsl(var(--background)), hsl(var(--primary) / 0.1));
+    @apply bg-background text-foreground;
   }
 }
