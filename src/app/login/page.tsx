@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +10,6 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
-  signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
@@ -45,12 +45,18 @@ const loginFormSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginFormSchema>;
 
-export default function LoginPage() {
-  const { user } = useAuth();
+function LoginComponent() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -59,11 +65,6 @@ export default function LoginPage() {
       password: '',
     },
   });
-
-  if (user) {
-    router.push('/');
-    return null;
-  }
 
   const handleAuthAction = async (
     action: 'login' | 'signup',
@@ -106,6 +107,10 @@ export default function LoginPage() {
       setIsGoogleLoading(false);
     }
   };
+  
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -193,4 +198,24 @@ export default function LoginPage() {
       </Card>
     </div>
   );
+}
+
+export default function LoginPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+        <div className="flex h-screen w-full items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+    );
+  }
+
+  if (user) {
+    router.push('/');
+    return null;
+  }
+
+  return <LoginComponent />;
 }
