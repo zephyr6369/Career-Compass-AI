@@ -37,16 +37,19 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
 
     toast({ title: 'Preparing PDF...', description: 'Please wait while we generate your document.' });
     
-    const originalBodyStyle = document.body.style.backgroundImage;
-    const originalBodyBg = document.body.style.backgroundColor;
-    
-    document.body.style.backgroundImage = 'none';
-    document.body.style.backgroundColor = 'hsl(var(--background))';
+    const htmlElement = document.documentElement;
+    const bodyElement = document.body;
+    const originalHtmlBg = htmlElement.style.backgroundColor;
+    const originalBodyBgImage = bodyElement.style.backgroundImage;
+
+    // Temporarily set a solid background color for PDF generation
+    htmlElement.style.backgroundColor = 'hsl(var(--background))';
+    bodyElement.style.backgroundImage = 'none';
     
     try {
       const canvas = await html2canvas(element, {
         scale: 2,
-        backgroundColor: 'hsl(var(--background))',
+        backgroundColor: null, // Use the element's background
         logging: true,
       });
       
@@ -83,8 +86,8 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
         });
     } finally {
         // Restore original body styles
-        document.body.style.backgroundImage = originalBodyStyle;
-        document.body.style.backgroundColor = originalBodyBg;
+        htmlElement.style.backgroundColor = originalHtmlBg;
+        bodyElement.style.backgroundImage = originalBodyBgImage;
     }
   };
 
