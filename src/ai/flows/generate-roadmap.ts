@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {googleAI} from '@genkit-ai/googleai';
 
 const GenerateRoadmapInputSchema = z.object({
   goal: z.string().describe('The user specified goal or interest.'),
@@ -43,6 +42,10 @@ const generateRoadmapPrompt = ai.definePrompt({
   - For "skills", list the key technical and soft skills that are in demand.
   - For "trends", describe the future outlook and emerging trends in this field.
   - For "journey", provide a clear, step-by-step path for a beginner to become job-ready.`,
+  model: 'googleai/gemini-1.5-flash-latest',
+  config: {
+    temperature: 0.5,
+  }
 });
 
 const generateRoadmapFlow = ai.defineFlow(
@@ -52,14 +55,7 @@ const generateRoadmapFlow = ai.defineFlow(
     outputSchema: GenerateRoadmapOutputSchema,
   },
   async input => {
-    const llm = googleAI.model('gemini-1.5-flash-latest');
-    const {output} = await llm.generate({
-      prompt: generateRoadmapPrompt.compile({input}),
-      output: {
-        format: 'json',
-        schema: GenerateRoadmapOutputSchema,
-      },
-    });
+    const {output} = await generateRoadmapPrompt(input);
 
     if (!output) {
       throw new Error('Failed to generate roadmap. The model returned no output.');
