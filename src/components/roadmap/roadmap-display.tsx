@@ -43,7 +43,7 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
     try {
       const canvas = await html2canvas(element, {
         scale: 2,
-        backgroundColor: 'hsl(var(--background))',
+        backgroundColor: getComputedStyle(document.body).getPropertyValue('--background').trim(),
       });
       
       const imgData = canvas.toDataURL('image/png');
