@@ -35,15 +35,18 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
     if (!element) return;
 
     toast({ title: 'Preparing PDF...', description: 'Please wait while we generate your document.' });
-
-    // Temporarily change body background for html2canvas compatibility
-    const originalStyle = document.body.style.backgroundImage;
+    
+    const originalBodyStyle = document.body.style.backgroundImage;
+    const originalBodyBg = document.body.style.backgroundColor;
+    
     document.body.style.backgroundImage = 'none';
+    document.body.style.backgroundColor = 'hsl(var(--background))';
     
     try {
       const canvas = await html2canvas(element, {
         scale: 2,
-        backgroundColor: getComputedStyle(document.body).getPropertyValue('--background').trim(),
+        backgroundColor: null, // Use transparent background for canvas
+        logging: true,
       });
       
       const imgData = canvas.toDataURL('image/png');
@@ -78,8 +81,9 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
             description: "An unexpected error occurred while creating the PDF.",
         });
     } finally {
-        // Restore original body background
-        document.body.style.backgroundImage = originalStyle;
+        // Restore original body styles
+        document.body.style.backgroundImage = originalBodyStyle;
+        document.body.style.backgroundColor = originalBodyBg;
     }
   };
 
@@ -94,7 +98,7 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
   };
 
   return (
-    <Card className="shadow-2xl shadow-primary/10 overflow-hidden">
+    <Card className="shadow-lg overflow-hidden">
       <CardHeader className="bg-muted/50 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
