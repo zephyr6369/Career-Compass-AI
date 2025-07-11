@@ -1,19 +1,31 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Loader2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Loader2, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { getRoadmap } from '@/app/actions';
 import { RoadmapForm, type RoadmapFormValues } from '@/components/roadmap/roadmap-form';
 import { RoadmapDisplay, type Roadmap } from '@/components/roadmap/roadmap-display';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/context/auth-context';
+import { Button } from '@/components/ui/button';
+import { auth } from '@/lib/firebase/client';
 
 export default function Home() {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const roadmapRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
 
   const handleGenerate = async (data: RoadmapFormValues) => {
     setIsLoading(true);
@@ -39,6 +51,19 @@ export default function Home() {
     }
   };
 
+  const handleSignOut = async () => {
+    await auth.signOut();
+    router.push('/login');
+  };
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
       <header className="flex justify-between items-center mb-12">
@@ -50,9 +75,13 @@ export default function Home() {
               A career roadmap is your strategic guide to professional growth. Describe your ambition, and let our AI chart a personalized path for you, from foundational skills to future industry trends.
             </p>
         </div>
+        <Button variant="outline" size="sm" onClick={handleSignOut} className="absolute top-4 right-4">
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+        </Button>
       </header>
       <main className="max-w-4xl mx-auto">
-        <Card className="shadow-2xl shadow-primary/10">
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Create Your Career Roadmap</CardTitle>
             <CardDescription>
