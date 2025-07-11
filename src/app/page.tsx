@@ -1,3 +1,4 @@
+// This file was moved from src/app/(main)/page.tsx to src/app/page.tsx to fix a routing issue.
 'use client';
 
 import { useState, useRef } from 'react';
