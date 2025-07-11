@@ -36,40 +36,56 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
 
     toast({ title: 'Preparing PDF...', description: 'Please wait while we generate your document.' });
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      backgroundColor: 'hsl(var(--background))',
-    });
+    // Temporarily change body background for html2canvas compatibility
+    const originalStyle = document.body.style.backgroundImage;
+    document.body.style.backgroundImage = 'none';
     
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
-    const ratio = canvasWidth / canvasHeight;
-    const imgWidth = pdfWidth;
-    const imgHeight = imgWidth / ratio;
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: 'hsl(var(--background))',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasWidth / canvasHeight;
+      const imgWidth = pdfWidth;
+      const imgHeight = imgWidth / ratio;
 
-    let heightLeft = imgHeight;
-    let position = 0;
+      let heightLeft = imgHeight;
+      let position = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pdfHeight;
-
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+      
+      pdf.save('roadmap.ai.pdf');
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        toast({
+            variant: "destructive",
+            title: "Failed to generate PDF",
+            description: "An unexpected error occurred while creating the PDF.",
+        });
+    } finally {
+        // Restore original body background
+        document.body.style.backgroundImage = originalStyle;
     }
-    
-    pdf.save('roadmap.ai.pdf');
   };
 
   const handleCopy = () => {
     const textToCopy = sectionsConfig.map(section => {
-      const body = content[section.key];
+      const body = content[section.key as keyof Roadmap];
       return `## ${section.title}\n\n${body}`;
     }).join('\n\n');
 
@@ -93,7 +109,7 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
       </CardHeader>
       <div ref={printRef} className="p-4 sm:p-6 bg-card">
         {sectionsConfig.map((section, index) => {
-          const body = content[section.key];
+          const body = content[section.key as keyof Roadmap];
           if (!body) return null;
 
           return (
