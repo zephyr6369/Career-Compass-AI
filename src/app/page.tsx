@@ -8,27 +8,14 @@ import { RoadmapForm, type RoadmapFormValues } from '@/components/roadmap/roadma
 import { RoadmapDisplay } from '@/components/roadmap/roadmap-display';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/context/auth-context';
-import { UserProfile } from '@/components/auth/user-profile';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 export default function Home() {
   const [roadmap, setRoadmap] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const roadmapRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const { user, loading } = useAuth();
 
   const handleGenerate = async (data: RoadmapFormValues) => {
-    if (!user) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Required',
-        description: 'You need to be logged in to generate a roadmap.',
-      });
-      return;
-    }
     setIsLoading(true);
     setRoadmap(null);
     try {
@@ -62,9 +49,6 @@ export default function Home() {
             <p className="max-w-3xl mx-auto text-muted-foreground text-lg md:text-xl">
               A career roadmap is your strategic guide to professional growth. Describe your ambition, and let our AI chart a personalized path for you, from foundational skills to future industry trends.
             </p>
-        </div>
-        <div className="absolute top-8 right-8">
-          {loading ? null : user ? <UserProfile /> : <Button asChild><Link href="/login">Sign In</Link></Button>}
         </div>
       </header>
       <main className="max-w-4xl mx-auto">
