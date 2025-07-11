@@ -18,7 +18,10 @@ const GenerateRoadmapInputSchema = z.object({
 export type GenerateRoadmapInput = z.infer<typeof GenerateRoadmapInputSchema>;
 
 const GenerateRoadmapOutputSchema = z.object({
-  roadmap: z.string().describe('The generated software career roadmap.'),
+  qualifications: z.string().describe('A markdown formatted list of qualifications needed.'),
+  skills: z.string().describe('A markdown formatted list of in-demand skills.'),
+  trends: z.string().describe('A markdown formatted list of future trends.'),
+  journey: z.string().describe('A markdown formatted step-by-step journey from beginner to job-ready.'),
 });
 
 export type GenerateRoadmapOutput = z.infer<typeof GenerateRoadmapOutputSchema>;
@@ -31,7 +34,14 @@ const generateRoadmapPrompt = ai.definePrompt({
   name: 'generateRoadmapPrompt',
   input: {schema: GenerateRoadmapInputSchema},
   output: {schema: GenerateRoadmapOutputSchema},
-  prompt: `Given the user's goal: "{{{goal}}}", generate a structured career roadmap including:\n- Qualifications Needed\n- In-Demand Skills\n- Future Trends\n- Step-by-step journey from beginner to job-ready\nFormat the response with clear section titles and bullet points or numbered steps.`,
+  prompt: `You are an expert career advisor. Given the user's goal: "{{{goal}}}", generate a structured career roadmap.
+
+  For each section (qualifications, skills, trends, journey), provide a detailed list formatted in markdown.
+
+  - For "qualifications", list the typical degrees, certifications, and other qualifications needed.
+  - For "skills", list the key technical and soft skills that are in demand.
+  - For "trends", describe the future outlook and emerging trends in this field.
+  - For "journey", provide a clear, step-by-step path for a beginner to become job-ready.`,
 });
 
 const generateRoadmapFlow = ai.defineFlow(

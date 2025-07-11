@@ -1,4 +1,3 @@
-// This file was moved from src/app/(main)/page.tsx to src/app/page.tsx to fix a routing issue.
 'use client';
 
 import { useState, useRef } from 'react';
@@ -6,12 +5,12 @@ import { Loader2 } from 'lucide-react';
 
 import { getRoadmap } from '@/app/actions';
 import { RoadmapForm, type RoadmapFormValues } from '@/components/roadmap/roadmap-form';
-import { RoadmapDisplay } from '@/components/roadmap/roadmap-display';
+import { RoadmapDisplay, type Roadmap } from '@/components/roadmap/roadmap-display';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Home() {
-  const [roadmap, setRoadmap] = useState<string | null>(null);
+  const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const roadmapRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();

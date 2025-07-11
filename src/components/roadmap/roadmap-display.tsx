@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { GraduationCap, Wrench, TrendingUp, Map, Bot, Download, Copy } from 'lucide-react';
+import { GraduationCap, Wrench, TrendingUp, Map, Download, Copy } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -10,55 +10,25 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MarkdownContent } from './markdown-content';
 import { useToast } from '@/hooks/use-toast';
+import type { GenerateRoadmapOutput } from '@/ai/flows/generate-roadmap';
+
+export type Roadmap = GenerateRoadmapOutput;
 
 interface RoadmapDisplayProps {
-  content: string;
+  content: Roadmap;
 }
 
-const iconMap: Record<string, React.ReactElement> = {
-  'Qualifications Needed': <GraduationCap className="h-6 w-6" />,
-  'Qualifications': <GraduationCap className="h-6 w-6" />,
-  'In-Demand Skills': <Wrench className="h-6 w-6" />,
-  'Skills': <Wrench className="h-6 w-6" />,
-  'Future Trends': <TrendingUp className="h-6 w-6" />,
-  'Step-by-step journey': <Map className="h-6 w-6" />,
-  'Career Journey': <Map className="h-6 w-6" />,
-  'Generated Roadmap': <Bot className="h-6 w-6" />,
-};
+const sectionsConfig = [
+  { key: 'qualifications', title: 'Qualifications Needed', icon: <GraduationCap className="h-6 w-6" /> },
+  { key: 'skills', title: 'In-Demand Skills', icon: <Wrench className="h-6 w-6" /> },
+  { key: 'trends', title: 'Future Trends', icon: <TrendingUp className="h-6 w-6" /> },
+  { key: 'journey', title: 'Step-by-Step Journey', icon: <Map className="h-6 w-6" /> },
+] as const;
 
-const parseRoadmap = (content: string) => {
-  const sections: { title: string; body: string }[] = [];
-  const keywords = [
-    "Qualifications Needed",
-    "In-Demand Skills",
-    "Future Trends",
-    "Step-by-step journey",
-    "Career Journey",
-    "Qualifications",
-    "Skills",
-  ];
-
-  const regex = new RegExp(`(^(?:##|###)\\s*(?:${keywords.join('|')}))`, 'gim');
-  const parts = content.split(regex).filter(part => part.trim() !== '');
-
-  for (let i = 0; i < parts.length; i += 2) {
-    if (parts[i] && parts[i + 1]) {
-      const title = parts[i].replace(/^(?:##|###)\s*/, '').trim();
-      const body = parts[i + 1].trim();
-      sections.push({ title, body });
-    }
-  }
-
-  if (sections.length === 0 && content) {
-    sections.push({ title: 'Generated Roadmap', body: content });
-  }
-  return sections;
-};
 
 export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
-  const sections = parseRoadmap(content);
 
   const handleDownloadPdf = async () => {
     const element = printRef.current;
@@ -98,7 +68,12 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
+    const textToCopy = sectionsConfig.map(section => {
+      const body = content[section.key];
+      return `## ${section.title}\n\n${body}`;
+    }).join('\n\n');
+
+    navigator.clipboard.writeText(textToCopy);
     toast({ title: 'Copied to clipboard!', description: 'Your roadmap is ready to be pasted.' });
   };
 
@@ -117,22 +92,27 @@ export function RoadmapDisplay({ content }: RoadmapDisplayProps) {
         </div>
       </CardHeader>
       <div ref={printRef} className="p-4 sm:p-6 bg-card">
-        {sections.map((section, index) => (
-          <div key={index}>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="flex-shrink-0 bg-primary text-primary-foreground rounded-full p-2">
-                {iconMap[section.title] || <Bot className="h-6 w-6" />}
-              </span>
-              <h2 className="text-xl font-bold tracking-tight text-foreground">{section.title}</h2>
+        {sectionsConfig.map((section, index) => {
+          const body = content[section.key];
+          if (!body) return null;
+
+          return (
+            <div key={section.key}>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="flex-shrink-0 bg-primary text-primary-foreground rounded-full p-2">
+                  {section.icon}
+                </span>
+                <h2 className="text-xl font-bold tracking-tight text-foreground">{section.title}</h2>
+              </div>
+              <div className="pl-4 border-l-2 border-primary/20 ml-5 mb-8">
+                  <div className="text-card-foreground/90 leading-relaxed pl-6">
+                    <MarkdownContent content={body} />
+                  </div>
+              </div>
+              {index < sectionsConfig.length - 1 && <Separator className="my-8" />}
             </div>
-            <div className="pl-4 border-l-2 border-primary/20 ml-5 mb-8">
-                <div className="text-card-foreground/90 leading-relaxed pl-6">
-                  <MarkdownContent content={section.body} />
-                </div>
-            </div>
-            {index < sections.length - 1 && <Separator className="my-8" />}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </Card>
   );
